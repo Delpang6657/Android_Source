@@ -8,10 +8,10 @@ import android.content.Intent;
 import android.widget.Toast;
 
 public class BthReceiver extends BroadcastReceiver {
-    public String sBthName, sAddress;
+    public String sName, sAddress;
 
-    public BthReceiver(String sBthName) {
-        this.sBthName = sBthName;
+    public BthReceiver(String sName) {
+        this.sName = sName;
         this.sAddress = "";
     }
 
@@ -24,9 +24,9 @@ public class BthReceiver extends BroadcastReceiver {
             BluetoothDevice device;
             device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 //            Toast.makeText(context, sName + "is found.", Toast.LENGTH_SHORT).show();
-            if (device.getName().equalsIgnoreCase(sBthName)) {
+            if (device.getName().equalsIgnoreCase(sName)) {
                 sAddress = device.getAddress();
-                Toast.makeText(context, sBthName + "is found: " + sAddress, Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, sName + "is found: " + sAddress, Toast.LENGTH_SHORT).show();
             }
         } else if (intent.getAction().equals(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)) {
             Toast.makeText(context, "Discovery is finished.", Toast.LENGTH_SHORT).show();

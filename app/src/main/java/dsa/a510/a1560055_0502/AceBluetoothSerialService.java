@@ -9,8 +9,10 @@ public class AceBluetoothSerialService extends BluetoothSerialService {
     }
 
     public String getSerialInput() {
+        lockReadBuffer();
         String str = sReadBuffer;
         sReadBuffer = "";
+        unlockReadBuffer();
         return str;
     }
 

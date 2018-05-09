@@ -39,6 +39,7 @@ import android.content.Context;
  */
 public class BluetoothSerialService {
     // UUID or GUID 생성 장소: http://www.guidgenerator.com/
+// UUID or GUID 생성 장소: http://www.guidgenerator.com/
     private static final UUID nAppUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); // Bluetooth SPP (Serial Port Profile) Service UUID: use this to communicate with SPP.
 
     // Member fields
@@ -47,7 +48,8 @@ public class BluetoothSerialService {
     private StreamThread thStream;
     private int nState;
     private Context cxAct;
-    public String sReadBuffer = "";  // Read를 위한 buffer, 외부에서 읽은 후 초기화해야 함
+    public String sReadBuffer;  // Read를 위한 buffer, 외부에서 읽은 후 초기화해야 함
+    private boolean bLockReadBuf;   // Locking boolean for sReadBuffer
 
     // Constants that indicate the current connection state
     public static final int STATE_NONE = 0;       // we're doing nothing
@@ -59,6 +61,8 @@ public class BluetoothSerialService {
         cxAct = context;
         bthAdapter = adapter;
         nState = STATE_NONE;
+        sReadBuffer = "";
+        bLockReadBuf = false;
     }
 
     private synchronized void setState(int state) {
@@ -67,6 +71,14 @@ public class BluetoothSerialService {
 
     public synchronized int getState() {
         return nState;
+    }
+
+    public synchronized void lockReadBuffer() {
+        bLockReadBuf = true;
+    }
+
+    public synchronized void unlockReadBuffer() {
+        bLockReadBuf = false;
     }
 
     /**
@@ -220,7 +232,7 @@ public class BluetoothSerialService {
                 } catch (IOException e2) {
                 }
                 // Start the service over to restart listening mode
-                //dsa.a510.a1560055_0502.BluetoothSerialService.this.start();
+                //BluetoothSerialService.this.start();
                 return;
             }
 
@@ -279,12 +291,15 @@ public class BluetoothSerialService {
                     if (bytes > 0) {
                         String str = "";
                         for (int i = 0; i < bytes; i++)
-                            str += (char)buffer[i];
+                            str += (char) buffer[i];
+                        while (bLockReadBuf) Thread.sleep(1);
                         sReadBuffer += str;
                     }
                 } catch (IOException e) {
                     connectionLost();
                     break;
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
         }
